@@ -1,25 +1,23 @@
 "use strict"
 
-
-
 var Worker = function() {
      var wordList = 
      {
-
+         an:undefined
      };
      var running = false;
 
-     function doSolve(grid, start) {
+     function doSolve(grid, start, resultCallback) {
          var maxX = grid[0].length;
          var maxY = grid.length;
 
          function getWord(positions) {
-             var word = "";
-             for(var i; i < positions.length; i++) {
-                 letterLoc = positions[i];
-                 word.concat(grid[letterLoc.y][letterLoc.x]);
-             }
-             return word;
+             return positions.map(function(position) { 
+                 return grid[position.y][position.x];
+             }).join("");
+         }
+         function toStr(position) {
+             return "x:" + position.x + "y:" + position.y;
          }
 
          function toTry(position, seen) {
@@ -29,17 +27,60 @@ var Worker = function() {
              var canGoSouth = position.y + 1 < maxY;
              var result = [];
              if(canGoWest) {
-                 
+                 result.unshift({x:position.x - 1, y:position.y});
              }
+             if(canGoWest && canGoNorth) {
+                 result.unshift({x:position.x - 1, y:position.y - 1});
+             }
+             if(canGoNorth) {
+                 result.unshift({x:position.x, y:position.y - 1});
+             }
+             if(canGoNorth && canGoEast) {
+                 result.unshift({x:position.x + 1, y:position.y - 1});
+             }
+             if(canGoEast) {
+                 result.unshift({x:position.x + 1, y:position.y});
+             }
+             if(canGoEast && canGoSouth) {
+                 result.unshift({x:position.x + 1, y:position.y + 1});
+             }
+             if(canGoSouth) {
+                 result.unshift({x:position.x, y:position.y + 1});
+             }
+             if(canGoSouth && canGoWest) {
+                 result.unshift({x:position.x - 1, y:position.y + 1});
+             }
+             return result.filter(function(element, index, array) {
+                 return !seen.hasOwnProperty(toStr(element));
+             });
          }
-         var seen = {};
-         while(running) {
-             
+         var current = start;
+         var positions = [current];
+         var currentName = toStr(current);
+         var seen = {currentName:undefined};
+         var nextToTry = toTry(current, seen)
+         while(running && nextToTry.length !== 0) {
+             var next = nextToTry.shift();
+             positions.push(next);
+             var word = toWord(positions);
+             if(wordList.hasOwnProperty(word)) {
+                 resultCallback(word);
+             }
+             var nextName = toStr(next);
+             seen[nextName] = undefined;
+             var nextNextToTry = toTry(next, seen);
+             if(nextNextToTry.length === 0) {
+                 positions.pop();
+                 delete seen[nextName];
+             }
+             else {
+                 nextToTry.unshift.apply(nextToTry, nextNextToTry);
+             }
          }
      };
 
      return {
-          start : function(grid, start
+          start : function(grid, start, resultFn) {
                running = true;
                doSolve(grid, start);
           },
@@ -68,7 +109,9 @@ addEventListener('message', function(e) {
                       }
                   }
               }
-              Worker.start(grid, location);
+              Worker.start(grid, location, function(result) {
+                  postMessage(result);
+              });
               break;
      };
 
