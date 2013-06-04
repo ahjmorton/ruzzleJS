@@ -19,7 +19,8 @@
                             li.appendChild(document.createTextNode(word));
                             wordList.appendChild(li);
                         };
-                        worker.postMessage({cmd:"start",grid:[["a","n"],["b","x"]], letter:"a"});
+                        var theGrid = [['a','y','r','p'],['k','l','u','b'],['o','t','s','h'],['c','v','m','i']];
+                        worker.postMessage({cmd:"start",grid:theGrid, letter:"l"});
                     }
                 };
             }();

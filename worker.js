@@ -1,5 +1,6 @@
 "use strict"
 
+
 var Worker = function() {
      var wordList = 
      {
