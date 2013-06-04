@@ -72964,7 +72964,7 @@ zymotically:undefined
          var positions = [current];
          var currentName = toStr(current);
          var seen = {};
-         seen[currentName] = 1;
+         seen[currentName] = undefined;
          var tryStack = {};
          tryStack[currentName] = toTry(current, seen);
          while(running && !empty(tryStack)) {
@@ -72983,7 +72983,7 @@ zymotically:undefined
                  positions.push(nextToTry);
                  current = nextToTry;
                  currentName = toStr(current);
-                 seen[currentName] = 1;
+                 seen[currentName] = undefined;
                  tryStack[currentName] = toTry(current, seen);
              }
              var word = toWord(positions);
