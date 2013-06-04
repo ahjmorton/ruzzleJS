@@ -4,23 +4,30 @@
         <script>
             "use strict"
             var App = function() {
-                var worker = new Worker("worker.js");
-                var addToList = function(word) {
-                    //Noop by default
-                }
-                worker.addEventListener('message', function(e) {
-                    addToList(e.data);
-                }, false)
+                var WORDLIST_FILE = "worker.js";
                 return {
                     start : function() {
                         var wordList = document.getElementById("wordList");
-                        addToList = function(word) {
+                        var addToList = function(msgData) {
                             var li = document.createElement("li");
-                            li.appendChild(document.createTextNode(word));
+                            li.appendChild(document.createTextNode(msgData.data));
                             wordList.appendChild(li);
                         };
-                        var theGrid = [['a','y','r','p'],['k','l','u','b'],['o','t','s','h'],['c','v','m','i']];
-                        worker.postMessage({cmd:"start",grid:theGrid, letter:"l"});
+                        var theGrid = ['a','y','r','p','k','l','u','b','o','t','s','h','c','v','m','i'];
+                        var gridded = [];
+                        var tmp = [];
+                        for(var i = 0; i < theGrid.length; i++) {
+                             tmp.push(theGrid[i]);
+                             if((i + 1) % 4 === 0) {
+                                 gridded.push(tmp);
+                                 tmp = [];
+                             }
+                        }
+                        for(var i = 0; i < theGrid.length; i++) {
+                            var worker = new Worker(WORDLIST_FILE);
+                            worker.postMessage({cmd:"start",grid:gridded, letter:theGrid[i]});
+                            worker.addEventListener('message', addToList);
+                        }
                     }
                 };
             }();
