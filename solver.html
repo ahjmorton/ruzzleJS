@@ -14,15 +14,15 @@
                             wordList.appendChild(li);
                         };
                         var theGrid = ['a','y','r','p','k','l','u','b','o','t','s','h','c','v','m','i'];
-                        var gridded = [];
-                        var tmp = [];
-                        for(var i = 0; i < theGrid.length; i++) {
-                             tmp.push(theGrid[i]);
-                             if((i + 1) % 4 === 0) {
-                                 gridded.push(tmp);
-                                 tmp = [];
-                             }
-                        }
+                        var gridded = theGrid.reduce(function(previousValue, nextValue, index, array) {
+                            if(index % 4 === 0) { 
+                                previousValue.push([nextValue]);
+                            }
+                            else {
+                                previousValue[previousValue.length - 1].push(nextValue);
+                            }
+                            return previousValue;
+                        }, []);
                         for(var i = 0; i < theGrid.length; i++) {
                             var worker = new Worker(WORDLIST_FILE);
                             worker.postMessage({cmd:"start",grid:gridded, letter:theGrid[i]});
