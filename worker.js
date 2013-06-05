@@ -1,6 +1,5 @@
 "use strict"
 
-
 var Worker = function() {
      var wordList = 
      {
@@ -72910,7 +72909,7 @@ zymotically:undefined
      };
      var running = false;
 
-     function doSolve(grid, start, resultCallback) {
+     function doSolve(grid, starts, resultCallback) {
          var maxX = grid[0].length;
          var maxY = grid.length;
 
@@ -72961,35 +72960,37 @@ zymotically:undefined
              for(var i in ob) { return false; }
              return true;
          }
-         var current = start;
-         var positions = [current];
-         var currentName = toStr(current);
-         var seen = {};
-         seen[currentName] = undefined;
-         var tryStack = {};
-         tryStack[currentName] = toTry(current, seen);
-         while(running && !empty(tryStack)) {
-             if(tryStack[currentName].length === 0) {
-                 delete tryStack[currentName];
-                 delete seen[currentName];
-                 positions.pop();
-                 if(positions.length !== 0) {
-                     current = positions[positions.length - 1];
-                     currentName = toStr(current);
+         for(var i = 0; i < starts.length; i++) {
+             var current = starts[i];
+             var positions = [current];
+             var currentName = toStr(current);
+             var seen = {};
+             seen[currentName] = undefined;
+             var tryStack = {};
+             tryStack[currentName] = toTry(current, seen);
+             while(running && !empty(tryStack)) {
+                 if(tryStack[currentName].length === 0) {
+                     delete tryStack[currentName];
+                     delete seen[currentName];
+                     positions.pop();
+                     if(positions.length !== 0) {
+                         current = positions[positions.length - 1];
+                         currentName = toStr(current);
+                     }
+                     continue;
                  }
-                 continue;
-             }
-             else {
-                 var nextToTry = tryStack[currentName].pop();
-                 positions.push(nextToTry);
-                 current = nextToTry;
-                 currentName = toStr(current);
-                 seen[currentName] = undefined;
-                 tryStack[currentName] = toTry(current, seen);
-             }
-             var word = toWord(positions);
-             if(wordList.hasOwnProperty(word)) {
-                 resultCallback(word);
+                 else {
+                     var nextToTry = tryStack[currentName].pop();
+                     positions.push(nextToTry);
+                     current = nextToTry;
+                     currentName = toStr(current);
+                     seen[currentName] = undefined;
+                     tryStack[currentName] = toTry(current, seen);
+                 }
+                 var word = toWord(positions);
+                 if(wordList.hasOwnProperty(word)) {
+                     resultCallback(word);
+                 }
              }
          }
      };
@@ -73016,15 +73017,19 @@ addEventListener('message', function(e) {
               break;
          case 'start' :
               var grid = data.grid;
-              var location = undefined;
-              for(var yLoc = 0; yLoc < grid.length && location === undefined; yLoc++) {
-                  for(var xLoc = 0; xLoc < grid[yLoc].length && location === undefined; xLoc++) {
-                      if(grid[yLoc][xLoc] === data.letter) {
-                          location = {x:xLoc, y:yLoc};
+              var locations = [];
+              for(var i = 0; i < data.letters.length ; i++) {
+                  var foundLoc = false;
+                  for(var yLoc = 0; yLoc < grid.length && !foundLoc; yLoc++) {
+                      for(var xLoc = 0; xLoc < grid[yLoc].length && !foundLoc; xLoc++) {
+                          if(grid[yLoc][xLoc] === data.letters[i]) {
+                              locations.push({x:xLoc, y:yLoc});
+                              foundLoc = true;
+                          }
                       }
                   }
               }
-              Worker.start(grid, location, function(result) {
+              Worker.start(grid, locations, function(result) {
                   postMessage(result);
               });
               break;

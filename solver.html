@@ -5,29 +5,39 @@
             "use strict"
             var App = function() {
                 var WORDLIST_FILE = "worker.js";
+                var LETTERS_PER_WORKER = 1;
+                function sublists(array, size) {
+                    return array.reduce(function(previousValue, nextValue, index) {
+                        if(index % size === 0) {
+                            previousValue.push([nextValue]);
+                        }
+                        else {
+                            previousValue[previousValue.length - 1].push(nextValue);
+                        }
+                        return previousValue;
+                    }, []);
+                };
+                function startWork(grid, resultFunc) {
+                    var assignments = sublists(grid, LETTERS_PER_WORKER); 
+                    var gridToSendToWorkers = sublists(grid, 4);
+                    for(var i = 0; i < assignments.length; i++) {
+                        var worker = new Worker(WORDLIST_FILE);
+                        worker.postMessage({cmd:"start", grid:gridToSendToWorkers, letters:assignments[i]});
+                        worker.addEventListener('message', function(msgData) {
+                            resultFunc(msgData.data);
+                        });
+                    }
+                };
                 return {
                     start : function() {
                         var wordList = document.getElementById("wordList");
-                        var addToList = function(msgData) {
+                        var addToList = function(data) {
                             var li = document.createElement("li");
-                            li.appendChild(document.createTextNode(msgData.data));
+                            li.appendChild(document.createTextNode(data));
                             wordList.appendChild(li);
                         };
                         var theGrid = ['a','y','r','p','k','l','u','b','o','t','s','h','c','v','m','i'];
-                        var gridded = theGrid.reduce(function(previousValue, nextValue, index, array) {
-                            if(index % 4 === 0) { 
-                                previousValue.push([nextValue]);
-                            }
-                            else {
-                                previousValue[previousValue.length - 1].push(nextValue);
-                            }
-                            return previousValue;
-                        }, []);
-                        for(var i = 0; i < theGrid.length; i++) {
-                            var worker = new Worker(WORDLIST_FILE);
-                            worker.postMessage({cmd:"start",grid:gridded, letter:theGrid[i]});
-                            worker.addEventListener('message', addToList);
-                        }
+                        startWork(theGrid, addToList);
                     }
                 };
             }();
