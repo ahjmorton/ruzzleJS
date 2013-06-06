@@ -5,7 +5,8 @@
             "use strict"
             var App = function() {
                 var WORDLIST_FILE = "worker.js";
-                var LETTERS_PER_WORKER = 1;
+                var LETTERS_PER_WORKER = 4;
+                var RESULT_LIST_ELEMENT = "wordlist";
                 function sublists(array, size) {
                     return array.reduce(function(previousValue, nextValue, index) {
                         if(index % size === 0) {
@@ -19,6 +20,7 @@
                 };
                 function startWork(grid, resultFunc) {
                     var assignments = sublists(grid, LETTERS_PER_WORKER); 
+                    console.log(assignments);
                     var gridToSendToWorkers = sublists(grid, 4);
                     for(var i = 0; i < assignments.length; i++) {
                         var worker = new Worker(WORDLIST_FILE);
@@ -28,16 +30,29 @@
                         });
                     }
                 };
+                var listHandler = function ListHandler() {
+                    var wordList = undefined;
+                    function getWordList() {
+                        if(typeof wordList === 'undefined') {
+                            wordList = document.getElementById("wordList");
+                        }
+                        return wordList;
+                    }
+                    return {
+                        add : function(word) {
+                            var li = document.createElement("li");
+                            li.appendChild(document.createTextNode(word));
+                            getWordList().appendChild(li);
+                        },
+                        clear : function() {
+                            getWordList().innerHTML = "";
+                        }
+                    };
+                }();
                 return {
                     start : function() {
-                        var wordList = document.getElementById("wordList");
-                        var addToList = function(data) {
-                            var li = document.createElement("li");
-                            li.appendChild(document.createTextNode(data));
-                            wordList.appendChild(li);
-                        };
                         var theGrid = ['a','y','r','p','k','l','u','b','o','t','s','h','c','v','m','i'];
-                        startWork(theGrid, addToList);
+                        startWork(theGrid, listHandler.add);
                     }
                 };
             }();
