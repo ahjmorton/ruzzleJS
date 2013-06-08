@@ -4,9 +4,6 @@
         <script>
             "use strict"
             var App = function() {
-                var WORDLIST_FILE = "worker.js";
-                var LETTERS_PER_WORKER = 4;
-                var RESULT_LIST_ELEMENT = "wordlist";
                 function sublists(array, size) {
                     return array.reduce(function(previousValue, nextValue, index) {
                         if(index % size === 0) {
@@ -19,49 +16,81 @@
                     }, []);
                 };
                 function startWork(grid, resultFunc) {
+                    var LETTERS_PER_WORKER = 4;
+                    var WORDLIST_FILE = "worker.js";
                     var assignments = sublists(grid, LETTERS_PER_WORKER); 
-                    console.log(assignments);
                     var gridToSendToWorkers = sublists(grid, 4);
+                    var stoppers = [];
                     for(var i = 0; i < assignments.length; i++) {
                         var worker = new Worker(WORDLIST_FILE);
                         worker.postMessage({cmd:"start", grid:gridToSendToWorkers, letters:assignments[i]});
                         worker.addEventListener('message', function(msgData) {
                             resultFunc(msgData.data);
                         });
+                        stoppers.push((function(toStop) {
+                            return function() {
+                                toStop.terminate();
+                            }
+                        })(worker));
                     }
+                    return stoppers;
                 };
-                var listHandler = function ListHandler() {
-                    var wordList = undefined;
-                    function getWordList() {
-                        if(typeof wordList === 'undefined') {
-                            wordList = document.getElementById("wordList");
+                var controller = function ListHandler() {
+                    var WORD_LIST_ID = "wordList";
+                    var ACTION_BUTTON_ID = "actionButton";
+                    var nodeCache = {};
+                    function get(nodeId) {
+                        if(!nodeCache.hasOwnProperty(nodeId)) {
+                            nodeCache[nodeId] = document.getElementById(nodeId);
                         }
-                        return wordList;
+                        return nodeCache[nodeId];
                     }
                     return {
-                        add : function(word) {
+                        addResult : function(word) {
                             var li = document.createElement("li");
                             li.appendChild(document.createTextNode(word));
-                            getWordList().appendChild(li);
+                            get(WORD_LIST_ID).appendChild(li);
                         },
-                        clear : function() {
-                            getWordList().innerHTML = "";
+                        clearResults : function() {
+                            get(WORD_LIST_ID).innerHTML = "";
+                        },
+                        changeActionButton : function (text, onClick) {
+                            var button = get(ACTION_BUTTON_ID);
+                            button.onclick = onClick;
+                            button.innerHTML = text;
                         }
                     };
                 }();
+                function init(startFunc) {
+                    controller.changeActionButton("Solve", startFunc);
+                };
+                function start() {
+                     controller.clearResults();
+                     var theGrid = ['a','y','r','p','k','l','u','b','o','t','s','h','c','v','m','i'];
+                     var stopFunctions = startWork(theGrid, controller.addResult);
+                     controller.changeActionButton("Stop", function() {
+                          for(var i = 0 ; i < stopFunctions.length; i++) {
+                              var stopFunction = stopFunctions[i];
+                              stopFunction();
+                          }
+                          controller.changeActionButton("Solve", start);
+                     });
+                };
                 return {
-                    start : function() {
-                        var theGrid = ['a','y','r','p','k','l','u','b','o','t','s','h','c','v','m','i'];
-                        startWork(theGrid, listHandler.add);
+                    initModule : function() {
+                        init(start);
                     }
                 };
             }();
-            window.onload=App.start;
+            window.onload=App.initModule;
         </script>
     </head>
     <body>
-        <h1>Generated words</h1>
-        <ul id="wordList">
-        </ul>
+        <div id="runArea">
+            <button id="actionButton" type="button" />
+        </div>
+        <div id="resultArea">
+            <ul id="wordList" />
+        </div>
     </body>
 </html>

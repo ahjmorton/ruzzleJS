@@ -72907,7 +72907,6 @@ zymoplastic:undefined,
 zymotechnical:undefined,
 zymotically:undefined
      };
-     var running = false;
 
      function doSolve(grid, starts, resultCallback) {
          var maxX = grid[0].length;
@@ -72968,7 +72967,7 @@ zymotically:undefined
              seen[currentName] = undefined;
              var tryStack = {};
              tryStack[currentName] = toTry(current, seen);
-             while(running && !empty(tryStack)) {
+             while(!empty(tryStack)) {
                  if(tryStack[currentName].length === 0) {
                      delete tryStack[currentName];
                      delete seen[currentName];
@@ -72997,12 +72996,9 @@ zymotically:undefined
 
      return {
           start : function(grid, start, resultFn) {
-               running = true;
                doSolve(grid, start, resultFn);
+               close();
           },
-          stop : function() {
-               running = false;
-          }
 
      };
 }();
@@ -73012,9 +73008,6 @@ addEventListener('message', function(e) {
      var data = e.data;
      var cmd  = data.cmd;
      switch(cmd) {
-         case 'stop' :
-              Worker.stop();
-              break;
          case 'start' :
               var grid = data.grid;
               var locations = [];
