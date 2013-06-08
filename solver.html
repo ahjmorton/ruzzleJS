@@ -44,7 +44,12 @@
                             nodeCache[nodeId] = document.getElementById(nodeId);
                         }
                         return nodeCache[nodeId];
-                    }
+                    };
+                    function changeActionButton(text, onClick) {
+                            var button = get(ACTION_BUTTON_ID);
+                            button.onclick = onClick;
+                            button.innerHTML = text;
+                    };
                     return {
                         addResult : function(word) {
                             var li = document.createElement("li");
@@ -54,31 +59,27 @@
                         clearResults : function() {
                             get(WORD_LIST_ID).innerHTML = "";
                         },
-                        changeActionButton : function (text, onClick) {
-                            var button = get(ACTION_BUTTON_ID);
-                            button.onclick = onClick;
-                            button.innerHTML = text;
+                        changeAction : changeActionButton,
+                        init : function(startFunc) {
+                            changeActionButton("Solve", startFunc);
                         }
                     };
                 }();
-                function init(startFunc) {
-                    controller.changeActionButton("Solve", startFunc);
-                };
                 function start() {
                      controller.clearResults();
                      var theGrid = ['a','y','r','p','k','l','u','b','o','t','s','h','c','v','m','i'];
                      var stopFunctions = startWork(theGrid, controller.addResult);
-                     controller.changeActionButton("Stop", function() {
+                     controller.changeAction("Stop", function() {
                           for(var i = 0 ; i < stopFunctions.length; i++) {
                               var stopFunction = stopFunctions[i];
                               stopFunction();
                           }
-                          controller.changeActionButton("Solve", start);
+                          controller.changeAction("Solve", start);
                      });
                 };
                 return {
                     initModule : function() {
-                        init(start);
+                        controller.init(start);
                     }
                 };
             }();
