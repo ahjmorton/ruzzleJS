@@ -105,7 +105,15 @@
                      controller.clearResults();
                      if(controller.verifyInputGrid(verifyInputGridCell)) {
                           var theGrid = controller.getInputGrid();
-                          var stopFunctions = startWork(theGrid, controller.addResult);
+                          var stopFunctions = startWork(theGrid, (function() {
+                              var seen = {};
+                              return function(word) {
+                                  if(!seen.hasOwnProperty(word)) {
+                                      controller.addResult(word);
+                                      seen[word] = undefined;
+                                  }
+                              };
+                              }()));
                           controller.changeAction("Stop", function() {
                               for(var i = 0 ; i < stopFunctions.length; i++) {
                                  var stopFunction = stopFunctions[i];
