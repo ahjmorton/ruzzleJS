@@ -38,6 +38,7 @@
                 var controller = function ListHandler() {
                     var WORD_LIST_ID = "wordList";
                     var ACTION_BUTTON_ID = "actionButton";
+                    var GRID_ELEMENT_DIV = "inputGrid";
                     var nodeCache = {};
                     function get(nodeId) {
                         if(!nodeCache.hasOwnProperty(nodeId)) {
@@ -46,9 +47,24 @@
                         return nodeCache[nodeId];
                     };
                     function changeActionButton(text, onClick) {
-                            var button = get(ACTION_BUTTON_ID);
-                            button.onclick = onClick;
-                            button.innerHTML = text;
+                        var button = get(ACTION_BUTTON_ID);
+                        button.onclick = onClick;
+                        button.innerHTML = text;
+                    };
+                    function getGridElements() {
+                        var arr = new Array();
+                        var nodeList = get(GRID_ELEMENT_DIV).getElementsByTagName("input");
+                        for(var i = 0; i < nodeList.length ; i++) {
+                            arr.push(nodeList[i]);
+                        }
+                        return arr;
+                    };
+                    function highlight(element) {
+                        var current = element.style.backgroundColor;
+                        setTimeout(function() {
+                            element.style.backgroundColor = current;
+                        }, 1000);
+                        element.style.backgroundColor = "red";
                     };
                     return {
                         addResult : function(word) {
@@ -60,22 +76,44 @@
                             get(WORD_LIST_ID).innerHTML = "";
                         },
                         changeAction : changeActionButton,
+                        verifyInputGrid : function(verifyFunction) {
+                            var toVerify = getGridElements();
+                            toVerify = toVerify.filter(function(element) {
+                                return verifyFunction(element.value);
+                            });
+                            if(toVerify.length === 0) {
+                                return true;
+                            }
+                            else {
+                                toVerify.forEach(highlight);
+                                return false;
+                            }
+                        },
+                        getInputGrid : function () {
+                            return getGridElements().map(function(element) { return element.value; });
+                        },
                         init : function(startFunc) {
                             changeActionButton("Solve", startFunc);
                         }
                     };
                 }();
+                function verifyInputGridCell(text) {
+                    return !(typeof text === 'string' &&
+                           text.length === 1);
+                };
                 function start() {
                      controller.clearResults();
-                     var theGrid = ['a','y','r','p','k','l','u','b','o','t','s','h','c','v','m','i'];
-                     var stopFunctions = startWork(theGrid, controller.addResult);
-                     controller.changeAction("Stop", function() {
-                          for(var i = 0 ; i < stopFunctions.length; i++) {
-                              var stopFunction = stopFunctions[i];
-                              stopFunction();
-                          }
-                          controller.changeAction("Solve", start);
-                     });
+                     if(controller.verifyInputGrid(verifyInputGridCell)) {
+                          var theGrid = controller.getInputGrid();
+                          var stopFunctions = startWork(theGrid, controller.addResult);
+                          controller.changeAction("Stop", function() {
+                              for(var i = 0 ; i < stopFunctions.length; i++) {
+                                 var stopFunction = stopFunctions[i];
+                                 stopFunction();
+                             }
+                             controller.changeAction("Solve", start);
+                          });
+                    }
                 };
                 return {
                     initModule : function() {
@@ -88,6 +126,24 @@
     </head>
     <body>
         <div id="runArea">
+            <div id="inputGrid">
+                <input type="text" size="1" />
+                <input type="text" size="1" />
+                <input type="text" size="1" />
+                <input type="text" size="1" />
+                <input type="text" size="1" />
+                <input type="text" size="1" />
+                <input type="text" size="1" />
+                <input type="text" size="1" />
+                <input type="text" size="1" />
+                <input type="text" size="1" />
+                <input type="text" size="1" />
+                <input type="text" size="1" />
+                <input type="text" size="1" />
+                <input type="text" size="1" />
+                <input type="text" size="1" />
+                <input type="text" size="1" />
+            </div>
             <button id="actionButton" type="button" />
         </div>
         <div id="resultArea">
