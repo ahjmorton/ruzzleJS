@@ -90,7 +90,7 @@
                             }
                         },
                         getInputGrid : function () {
-                            return getGridElements().map(function(element) { return element.value; });
+                            return getGridElements().map(function(element) { return element.value.toLowerCase(); });
                         },
                         init : function(startFunc) {
                             changeActionButton("Solve", startFunc);
@@ -131,9 +131,13 @@
             }();
             window.onload=App.initModule;
         </script>
+        <link rel="stylesheet" type="text/css" href="solver.css" />
     </head>
     <body>
         <div class="root">
+            <header>
+                <h1>Ruzzle solver</h1>
+            </header>
             <div class="grid" id="inputGrid">
                 <div class="col-1-4">
                     <input type="text" maxlength="1" />
