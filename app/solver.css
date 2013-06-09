@@ -1,7 +1,25 @@
-header { display: block }
+header { 
+    display: block;
+}
+
+header h1 {
+    text-align : center;
+}
 
 .root {
-    width: 50% ;
+    width: 15% ;
     margin-left: auto ;
     margin-right: auto ;
+}
+
+.grid {
+    float: left;
+}
+
+.grid input {
+    width: 1em;
+}
+
+.results {
+    float: left;
 }
