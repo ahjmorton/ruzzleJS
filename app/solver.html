@@ -3,6 +3,27 @@
     <head>
         <script>
             "use strict"
+            var WordList = function() {
+                var wordList = {};
+                var WORDLIST_URL = document.URL + "json/wordlist.json?callback=WordList.setWordList";
+                
+                return {
+                    updateFromServer : function() {
+                        var scriptNode = document.createElement("script");
+                        scriptNode.type = "text/javascript";
+                        scriptNode.src = WORDLIST_URL;
+                        document.head.appendChild(scriptNode);
+                        
+                    },
+                    setWordList : function(list) {
+                        wordList = list;
+                    },
+                    getWordList : function() {
+                        return wordList;
+                    }
+                }; 
+            }();
+
             var App = function() {
                 function sublists(array, size) {
                     return array.reduce(function(previousValue, nextValue, index) {
@@ -15,7 +36,7 @@
                         return previousValue;
                     }, []);
                 };
-                function startWork(grid, resultFunc) {
+                function startWork(grid, wordListObj, resultFunc) {
                     var LETTERS_PER_WORKER = 4;
                     var WORDLIST_FILE = "worker.js";
                     var assignments = sublists(grid, LETTERS_PER_WORKER); 
@@ -23,7 +44,7 @@
                     var stoppers = [];
                     for(var i = 0; i < assignments.length; i++) {
                         var worker = new Worker(WORDLIST_FILE);
-                        worker.postMessage({cmd:"start", grid:gridToSendToWorkers, letters:assignments[i]});
+                        worker.postMessage({cmd:"start", grid:gridToSendToWorkers, wordList:wordListObj, letters:assignments[i]});
                         worker.addEventListener('message', function(msgData) {
                             resultFunc(msgData.data);
                         });
@@ -97,15 +118,13 @@
                         }
                     };
                 }();
-                function verifyInputGridCell(text) {
-                    return !(typeof text === 'string' &&
-                           text.length === 1);
-                };
                 function start() {
                      controller.clearResults();
-                     if(controller.verifyInputGrid(verifyInputGridCell)) {
+                     if(controller.verifyInputGrid(function(text) {
+                              return !(typeof text === 'string' && text.length === 1);
+                          })) {
                           var theGrid = controller.getInputGrid();
-                          var stopFunctions = startWork(theGrid, (function() {
+                          var stopFunctions = startWork(theGrid, WordList.getWordList(), (function() {
                               var seen = {};
                               return function(word) {
                                   if(!seen.hasOwnProperty(word)) {
@@ -126,6 +145,7 @@
                 return {
                     initModule : function() {
                         controller.init(start);
+                        WordList.updateFromServer();
                     }
                 };
             }();
