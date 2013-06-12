@@ -21,18 +21,19 @@ var WordList = function () {
 }();
 
 var App = function () {
-    function sublists(array, size) {
-        return array.reduce(function (previousValue, nextValue, index) {
-            if (index % size === 0) {
-                previousValue.push([nextValue]);
-            } else {
-                previousValue[previousValue.length - 1].push(nextValue);
-            }
-            return previousValue;
-        }, []);
-    };
+
 
     function startWork(grid, wordListObj, resultFunc) {
+        function sublists(array, size) {
+            return array.reduce(function (previousValue, nextValue, index) {
+                if (index % size === 0) {
+                    previousValue.push([nextValue]);
+                } else {
+                    previousValue[previousValue.length - 1].push(nextValue);
+                }
+                return previousValue;
+            }, []);
+        };
         var LETTERS_PER_WORKER = 4;
         var WORDLIST_FILE = "worker.js";
         var assignments = sublists(grid, LETTERS_PER_WORKER);
@@ -50,10 +51,10 @@ var App = function () {
                 resultFunc(msgData.data);
             });
             stoppers.push((function (toStop) {
-                        return function () {
-                            toStop.terminate();
-                        }
-                    })(worker));
+                return function () {
+                    toStop.terminate();
+                }
+            })(worker));
         }
         return stoppers;
     };
@@ -125,6 +126,12 @@ var App = function () {
                     return false;
                 }
             },
+            disableResetButton : function() {
+                get(RESET_BUTTON_ID).disabled = true;
+            },
+            enableResetButton : function() {
+                get(RESET_BUTTON_ID).disabled = false;
+            },
             getInputGrid: function () {
                 return getGridElements().map(function (element) {
                     return element.value.toLowerCase();
@@ -142,6 +149,7 @@ var App = function () {
         if (controller.verifyInputGrid(function (text) {
                     return !(typeof text === 'string' && text.length === 1);
                 })) {
+            controller.disableResetButton();
             var theGrid = controller.getInputGrid();
             var stopFunctions = startWork(theGrid, WordList.getWordList(), (function () {
                         var seen = {};
@@ -157,6 +165,7 @@ var App = function () {
                     var stopFunction = stopFunctions[i];
                     stopFunction();
                 }
+                controller.enableResetButton();
                 controller.changeAction("Solve", start);
             });
         }
