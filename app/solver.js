@@ -57,9 +57,10 @@ var App = function () {
         }
         return stoppers;
     };
-    var controller = function ListHandler() {
+    var controller = function() {
         var WORD_LIST_ID = "wordList";
         var ACTION_BUTTON_ID = "actionButton";
+        var RESET_BUTTON_ID = "resetButton";
         var GRID_ELEMENT_DIV = "inputGrid";
         var nodeCache = {};
 
@@ -70,8 +71,8 @@ var App = function () {
             return nodeCache[nodeId];
         };
 
-        function changeActionButton(text, onClick) {
-            var button = get(ACTION_BUTTON_ID);
+        function changeButton(nodeId, text, onClick) {
+            var button = get(nodeId);
             button.onclick = onClick;
             button.innerHTML = text;
         };
@@ -92,6 +93,12 @@ var App = function () {
             }, 1000);
             element.style.backgroundColor = "red";
         };
+
+        function resetInputs() {
+            getGridElements().forEach(function(element) {
+                element.value = '';
+            });
+        };
         return {
             addResult: function (word) {
                 var li = document.createElement("li");
@@ -101,7 +108,11 @@ var App = function () {
             clearResults: function () {
                 get(WORD_LIST_ID).innerHTML = "";
             },
-            changeAction: changeActionButton,
+            changeAction: function() {
+                 return function(text, onClick) {
+                     changeButton(ACTION_BUTTON_ID, text, onClick);
+                 };
+            }(),
             verifyInputGrid: function (verifyFunction) {
                 var toVerify = getGridElements();
                 toVerify = toVerify.filter(function (element) {
@@ -120,7 +131,8 @@ var App = function () {
                 });
             },
             init: function (startFunc) {
-                changeActionButton("Solve", startFunc);
+                changeButton(ACTION_BUTTON_ID, "Solve", startFunc);
+                changeButton(RESET_BUTTON_ID, "Reset", resetInputs);
             }
         };
     }();
