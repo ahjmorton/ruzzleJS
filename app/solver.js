@@ -64,6 +64,7 @@ var App = function () {
         var RESET_BUTTON_ID = "resetButton";
         var GRID_ELEMENT_DIV = "inputGrid";
         var nodeCache = {};
+        var gridElements = undefined;
 
         function get(nodeId) {
             if (!nodeCache.hasOwnProperty(nodeId)) {
@@ -79,12 +80,14 @@ var App = function () {
         };
 
         function getGridElements() {
-            var arr = new Array();
-            var nodeList = get(GRID_ELEMENT_DIV).getElementsByTagName("input");
-            for (var i = 0; i < nodeList.length; i++) {
-                arr.push(nodeList[i]);
+            if(typeof gridElements === 'undefined') {
+                gridElements = new Array();
+                var nodeList = get(GRID_ELEMENT_DIV).getElementsByTagName("input");
+                for (var i = 0; i < nodeList.length; i++) {
+                   gridElements.push(nodeList[i]);
+                }
             }
-            return arr;
+            return gridElements;
         };
 
         function highlight(element) {
