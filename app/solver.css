@@ -6,35 +6,42 @@ header h1 {
     text-align : center;
 }
 
-.root {
-    max-width: 50;
+#root {
+    max-width: 40%;
     margin-left: auto ;
     margin-right: auto ;
 }
 
-.gridAndStatus {
-    max-width: 50%;
+#setup {
+    max-width: 40%;
     margin-left: auto ;
     margin-right: auto ;
 }
 
-.grid {
-    clear: left;
+#inputGrid {
+    float:left;
 }
 
-.grid input {
+#status {
+    float:left;
+}
+
+#inputGrid input {
     width: 1em;
 }
 
-.actions {
-    clear:left;
+#actions {
+    clear : both;
+    text-align: center;
+    margin-left: auto ;
+    margin-right: auto ;
 }
 
-.results {
+#results {
     clear:both;
 }
 
-.results li {
+#results li {
     float:left;
     padding:1em;
     list-style:none;
