@@ -1,26 +1,25 @@
 "use strict"
-var WordList = function () {
-    var wordList = {};
-    var WORDLIST_URL = document.URL + "json/wordlist.json?callback=WordList.setWordList";
-
-    return {
-        updateFromServer: function () {
-            var scriptNode = document.createElement("script");
-            scriptNode.type = "text/javascript";
-            scriptNode.src = WORDLIST_URL;
-            document.head.appendChild(scriptNode);
-
-        },
-        setWordList: function (list) {
-            wordList = list;
-        },
-        getWordList: function () {
-            return wordList;
-        }
-    };
-}();
 
 var App = function () {
+    var wordList = function () {
+        var wordList = {};
+        var WORDLIST_URL = document.URL + "json/wordlist.json?callback=App.wordListCallback";
+
+        return {
+            updateFromServer: function () {
+                var scriptNode = document.createElement("script");
+                scriptNode.type = "text/javascript";
+                scriptNode.src = WORDLIST_URL;
+                document.head.appendChild(scriptNode);
+            },
+            setWordList: function (list) {
+                wordList = list;
+            },
+            getWordList: function () {
+                return wordList;
+            }
+        };
+    }();
 
 
     function startWork(grid, wordListObj, resultFunc) {
@@ -154,7 +153,7 @@ var App = function () {
                 })) {
             controller.disableResetButton();
             var theGrid = controller.getInputGrid();
-            var stopFunctions = startWork(theGrid, WordList.getWordList(), (function () {
+            var stopFunctions = startWork(theGrid, wordList.getWordList(), (function () {
                         var seen = {};
                         return function (word) {
                             if (!seen.hasOwnProperty(word)) {
@@ -176,7 +175,10 @@ var App = function () {
     return {
         initModule: function () {
             controller.init(start);
-            WordList.updateFromServer();
+            wordList.updateFromServer();
+        },
+        wordListCallback : function(list) {
+            wordList.setWordList(list);
         }
     };
 }();
