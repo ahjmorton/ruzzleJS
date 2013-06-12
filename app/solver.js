@@ -3,13 +3,13 @@
 var App = function () {
     var wordList = function () {
         var wordList = {};
-        var WORDLIST_URL = document.URL + "json/wordlist.json?callback=App.wordListCallback";
+        var WORDLIST_URL = document.URL + "json/wordlist.json?callback=";
 
         return {
-            updateFromServer: function () {
+            init: function (callbackName) {
                 var scriptNode = document.createElement("script");
                 scriptNode.type = "text/javascript";
-                scriptNode.src = WORDLIST_URL;
+                scriptNode.src = WORDLIST_URL + callbackName;
                 document.head.appendChild(scriptNode);
             },
             setWordList: function (list) {
@@ -54,7 +54,7 @@ var App = function () {
                     var cleanUp = function(workerId) {
                         return function() {
                             delete stoppers[workerId];
-                            stopFunc(workerId);
+                            stopFunc(workerId, Object.keys(stoppers));
                         };
                     }(i);
                     worker.addEventListener('message', function(cleanupFunc) {
@@ -89,6 +89,7 @@ var App = function () {
     }();
     var controller = function() {
         var WORD_LIST_ID = "wordList";
+        var STATUS_LIST_ID = "statusList";
         var ACTION_BUTTON_ID = "actionButton";
         var RESET_BUTTON_ID = "resetButton";
         var GRID_ELEMENT_DIV = "inputGrid";
@@ -178,37 +179,40 @@ var App = function () {
             }
         };
     }();
-
     function start() {
+        function whenDone() {
+            solver.stopWork();
+            controller.enableResetButton();
+            controller.changeAction("Solve", start);
+        };
         if (controller.verifyInputGrid(function (text) {
                     return !(typeof text === 'string' && text.length === 1);
                 })) {
             controller.disableResetButton();
             var theGrid = controller.getInputGrid();
             controller.clearResults();
-            solver.startWork(theGrid, wordList.getWordList(), (function () {
-                        var seen = {};
-                        return function (word) {
-                            if (!seen.hasOwnProperty(word)) {
-                                controller.addResult(word);
-                                seen[word] = undefined;
-                            }
-                        };
-                    }()),
-                    function(workerId) {
-                        console.log("king " + workerId + " is dead");
-                    });
-            controller.changeAction("Stop", function () {
-                solver.stopWork();
-                controller.enableResetButton();
-                controller.changeAction("Solve", start);
-            });
+            var assignments = solver.startWork(theGrid, wordList.getWordList(), (function () {
+                    var seen = {};
+                    return function (word) {
+                        if (!seen.hasOwnProperty(word)) {
+                            controller.addResult(word);
+                            seen[word] = undefined;
+                        }
+                    };
+                 }()),
+                 function(workerId, workersLeft) {
+                    if(typeof workersLeft === 'undefined' || workersLeft.length === 0) {
+                        whenDone();
+                    }
+                 }
+            );
+            controller.changeAction("Stop", whenDone);
         }
     };
     return {
         initModule: function () {
             controller.init(start);
-            wordList.updateFromServer();
+            wordList.init("App.wordListCallback");
         },
         wordListCallback : function(list) {
             wordList.setWordList(list);
