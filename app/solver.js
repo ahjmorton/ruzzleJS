@@ -90,11 +90,14 @@ var App = function () {
         };
 
         function highlight(element) {
-            var current = element.style.backgroundColor;
+            var HIGHLIGHT_CLASS_NAME = "gridError";
             setTimeout(function () {
-                element.style.backgroundColor = current;
+                var reStr = "(?:^|\\s)" + HIGHLIGHT_CLASS_NAME + "(?!\\S)";
+                console.log(reStr);
+                var re = new RegExp(reStr, "g");
+                element.className = element.className.replace(re, '');
             }, 1000);
-            element.style.backgroundColor = "red";
+            element.className = element.className + " " + HIGHLIGHT_CLASS_NAME; 
         };
 
         function resetInputs() {
@@ -147,12 +150,12 @@ var App = function () {
     }();
 
     function start() {
-        controller.clearResults();
         if (controller.verifyInputGrid(function (text) {
                     return !(typeof text === 'string' && text.length === 1);
                 })) {
             controller.disableResetButton();
             var theGrid = controller.getInputGrid();
+            controller.clearResults();
             var stopFunctions = startWork(theGrid, wordList.getWordList(), (function () {
                         var seen = {};
                         return function (word) {

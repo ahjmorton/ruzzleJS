@@ -30,6 +30,10 @@ header h1 {
     width: 1em;
 }
 
+#inputGrid input.gridError {
+    background-color: red;
+}
+
 #actions {
     clear : both;
     text-align: center;
