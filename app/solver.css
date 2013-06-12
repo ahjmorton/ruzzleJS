@@ -7,19 +7,35 @@ header h1 {
 }
 
 .root {
-    width: 15% ;
+    max-width: 50;
+    margin-left: auto ;
+    margin-right: auto ;
+}
+
+.gridAndStatus {
+    max-width: 50%;
     margin-left: auto ;
     margin-right: auto ;
 }
 
 .grid {
-    float: left;
+    clear: left;
 }
 
 .grid input {
     width: 1em;
 }
 
+.actions {
+    clear:left;
+}
+
 .results {
-    float: left;
+    clear:both;
+}
+
+.results li {
+    float:left;
+    padding:1em;
+    list-style:none;
 }
