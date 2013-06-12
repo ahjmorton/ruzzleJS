@@ -90,12 +90,9 @@ var Worker = function() {
      return {
           start : function(grid, start, wordList, resultFn) {
                doSolve(grid, start, wordList, resultFn);
-               close();
-          },
-
+          }
      };
 }();
-
 
 addEventListener('message', function(e) {
      var data = e.data;
@@ -116,8 +113,10 @@ addEventListener('message', function(e) {
                   }
               }
               Worker.start(grid, locations, data.wordList, function(result) {
-                  postMessage(result);
+                  postMessage({cmd:"result", word:result});
               });
+              postMessage({cmd:"closing"});
+              close();
               break;
      };
 
