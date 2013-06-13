@@ -206,6 +206,7 @@ var App = function () {
             controller.disableResetButton();
             var theGrid = controller.getInputGrid();
             controller.clearResults();
+            controller.clearStatus();
             var assignments = solver.startWork(theGrid, wordList.getWordList(), (function () {
                     var seen = {};
                     return function (word) {
