@@ -51,14 +51,13 @@ var App = function () {
                         wordList: wordListObj,
                         letters: assignments[i]
                     });
-                    var cleanUp = function(workerId) {
+                    var cleanupFunc = function(workerId) {
                         return function() {
                             delete stoppers[workerId];
                             stopFunc(workerId, Object.keys(stoppers));
                         };
                     }(i);
-                    worker.addEventListener('message', function(cleanupFunc) {
-                        return function (msgData) {
+                    worker.addEventListener('message', function(msgData) {
                             msgData = msgData.data;
                             switch(msgData.cmd) {
                                 case "result" :
@@ -68,14 +67,13 @@ var App = function () {
                                     cleanupFunc();
                                     break;
                             }
-                        };
-                    }(cleanUp));
-                    stoppers[i] = ((function (toStop, cleanupFunc) {
-                        return function () {
-                            toStop.terminate();
-                            cleanupFunc();
                         }
-                    })(worker, cleanUp));
+                    );
+                    stoppers[i] = 
+                        function () {
+                            worker.terminate();
+                            cleanupFunc();
+                        };
                     results[i] = assignments[i];
                  }
                  return results;
