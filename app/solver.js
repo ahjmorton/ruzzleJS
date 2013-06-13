@@ -51,13 +51,14 @@ var App = function () {
                         wordList: wordListObj,
                         letters: assignments[i]
                     });
-                    var cleanupFunc = function(workerId) {
+                    var cleanup = function(workerId) {
                         return function() {
                             delete stoppers[workerId];
                             stopFunc(workerId, Object.keys(stoppers));
                         };
                     }(i);
-                    worker.addEventListener('message', function(msgData) {
+                    worker.addEventListener('message', function(cleanupFunc) {
+                        return function(msgData)  {
                             msgData = msgData.data;
                             switch(msgData.cmd) {
                                 case "result" :
@@ -68,12 +69,13 @@ var App = function () {
                                     break;
                             }
                         }
-                    );
-                    stoppers[i] = 
-                        function () {
-                            worker.terminate();
+                    }(cleanup));
+                    stoppers[i] = function(toClose, cleanupFunc) {
+                        return function () {
+                            toClose.terminate();
                             cleanupFunc();
                         };
+                    }(worker, cleanup);
                     results[i] = assignments[i];
                  }
                  return results;
@@ -92,6 +94,7 @@ var App = function () {
         var RESET_BUTTON_ID = "resetButton";
         var GRID_ELEMENT_DIV = "inputGrid";
         var nodeCache = {};
+        var statusLines = {};
         var gridElements = undefined;
 
         function get(nodeId) {
@@ -139,6 +142,20 @@ var App = function () {
                 var li = document.createElement("li");
                 li.appendChild(document.createTextNode(word));
                 get(WORD_LIST_ID).appendChild(li);
+            },
+            addStatusLine : function (statusId, text) {
+                var li = document.createElement("li");
+                li.appendChild(document.createTextNode(text));
+                get(STATUS_LIST_ID).appendChild(li);
+                statusLines[statusId] = li;
+            },
+            markStatusAsComplete : function(statusId) {
+                var STATUS_COMPLETE_NAME = "completed";
+                statusLines[statusId].className = statusLines[statusId].className + " " + STATUS_COMPLETE_NAME;
+            },
+            clearStatus : function () {
+                get(STATUS_LIST_ID).innerHTML = "";
+                statusLines = {};
             },
             clearResults: function () {
                 get(WORD_LIST_ID).innerHTML = "";
@@ -199,11 +216,15 @@ var App = function () {
                     };
                  }()),
                  function(workerId, workersLeft) {
+                    controller.markStatusAsComplete(workerId);
                     if(typeof workersLeft === 'undefined' || workersLeft.length === 0) {
                         whenDone();
                     }
                  }
             );
+            Object.keys(assignments).forEach(function(workerId) {
+                 controller.addStatusLine(workerId, "" + workerId + "[" + assignments[workerId].join() + "]");
+            });
             controller.changeAction("Stop", whenDone);
         }
     };
