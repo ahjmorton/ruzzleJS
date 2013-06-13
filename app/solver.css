@@ -26,6 +26,14 @@ header h1 {
     float:left;
 }
 
+#statusList li {
+     text-size : 65%;
+}
+
+#statusList li.completed {
+     color : green;
+}
+
 #inputGrid input {
     width: 1em;
 }
