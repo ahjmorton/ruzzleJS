@@ -1,7 +1,7 @@
 "use strict"
 
-define(["app/local-wordlist","app/local-wordlist-loader"], 
-    function(wordList) {
+define(["app/local-resources","app/local-resources-loader"], 
+    function(resources) {
         var LETTERS_PER_WORKER = 4;
         var WORDLIST_FILE = "js/app/worker.js";
         var stoppers = {}
@@ -17,7 +17,8 @@ define(["app/local-wordlist","app/local-wordlist-loader"],
         };
         return {
             startWork: function(grid, resultFunc, stopFunc) {
-                var wordListObj = wordList.getWordList();
+                var wordListObj = resources.getWordList();
+                var markovObj = resources.getMarkovChain();
                 resultFunc = resultFunc || function () {};
                 stopFunc = stopFunc || function() {};
                 var assignments = sublists(grid, LETTERS_PER_WORKER);
@@ -30,6 +31,7 @@ define(["app/local-wordlist","app/local-wordlist-loader"],
                         cmd: "start",
                         grid: gridToSendToWorkers,
                         wordList: wordListObj,
+                        markov: markovObj,
                         letters: assignments[i]
                     });
                     var cleanup = function(workerId) {

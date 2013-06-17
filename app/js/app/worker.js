@@ -20,7 +20,7 @@ addEventListener('message', function(e) {
                       }
                   }
               }
-              Solver.start(grid, locations, data.wordList, function(result) {
+              Solver.start(grid, locations, data.wordList, data.markov, function(result) {
                   postMessage({cmd:"result", word:result});
               });
               postMessage({cmd:"closing"});

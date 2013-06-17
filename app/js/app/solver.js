@@ -1,13 +1,15 @@
 "use strict"
+
 var Solver = function() {
-     function doSolve(grid, starts, wordList, resultCallback) {
+     function doSolve(grid, starts, wordList, markov, resultCallback) {
          var maxX = grid[0].length;
          var maxY = grid.length;
 
+         function toChar(position) {
+             return grid[position.y][position.x];
+         }
          function toWord(positions) {
-             return positions.map(function(position) { 
-                 return grid[position.y][position.x];
-             }).join("");
+             return positions.map(toChar).join("");
          }
          function toStr(position) {
              return "x:" + position.x + "y:" + position.y;
@@ -43,8 +45,11 @@ var Solver = function() {
              if(canGoSouth && canGoWest) {
                  result.unshift({x:position.x - 1, y:position.y + 1});
              }
+             var current = toChar(position);
              return result.filter(function(element, index, array) {
-                 return !seen.hasOwnProperty(toStr(element));
+                 var nextChar = toChar(element);
+                 return !seen.hasOwnProperty(toStr(element)) &&
+                        typeof markov[current][nextChar] !== 'undefined';
              });
          }
          function empty(ob) {
@@ -87,8 +92,8 @@ var Solver = function() {
      };
 
      return {
-          start : function(grid, start, wordList, resultFn) {
-               doSolve(grid, start, wordList, resultFn);
+          start : function(grid, start, wordList, markov, resultFn) {
+               doSolve(grid, start, wordList, markov, resultFn);
           }
      };
 }();
