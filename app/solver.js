@@ -194,6 +194,15 @@ var App = function () {
             }
         };
     }();
+    function noDups(fn) {
+        var seen = {};
+        return function(item) {
+            if(!seen.hasOwnProperty[item]) {
+                fn(item);
+                seen[item] = undefined;
+            }
+        };
+    };
     function start() {
         function whenDone() {
             solver.stopWork();
@@ -207,15 +216,8 @@ var App = function () {
             var theGrid = controller.getInputGrid();
             controller.clearResults();
             controller.clearStatus();
-            var assignments = solver.startWork(theGrid, wordList.getWordList(), (function () {
-                    var seen = {};
-                    return function (word) {
-                        if (!seen.hasOwnProperty(word)) {
-                            controller.addResult(word);
-                            seen[word] = undefined;
-                        }
-                    };
-                 }()),
+            var assignments = solver.startWork(theGrid, wordList.getWordList(),
+                 noDups(controller.addResult),
                  function(workerId, workersLeft) {
                     controller.markStatusAsComplete(workerId);
                     if(typeof workersLeft === 'undefined' || workersLeft.length === 0) {
