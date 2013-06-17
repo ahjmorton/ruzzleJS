@@ -125,7 +125,6 @@ var App = function () {
             var HIGHLIGHT_CLASS_NAME = "gridError";
             setTimeout(function () {
                 var reStr = "(?:^|\\s)" + HIGHLIGHT_CLASS_NAME + "(?!\\S)";
-                console.log(reStr);
                 var re = new RegExp(reStr, "g");
                 element.className = element.className.replace(re, '');
             }, 1000);
@@ -197,8 +196,6 @@ var App = function () {
     function noDups(fn) {
         var seen = {};
         return function(item) {
-            console.log(seen);
-            console.log(item);
             if(!seen.hasOwnProperty(item)) {
                 fn(item);
                 seen[item] = undefined;
