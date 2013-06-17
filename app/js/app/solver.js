@@ -22,28 +22,28 @@ var Solver = function() {
              var canGoSouth = position.y + 1 < maxY;
              var result = [];
              if(canGoWest) {
-                 result.unshift({x:position.x - 1, y:position.y});
+                 result.push({x:position.x - 1, y:position.y});
              }
              if(canGoWest && canGoNorth) {
-                 result.unshift({x:position.x - 1, y:position.y - 1});
+                 result.push({x:position.x - 1, y:position.y - 1});
              }
              if(canGoNorth) {
-                 result.unshift({x:position.x, y:position.y - 1});
+                 result.push({x:position.x, y:position.y - 1});
              }
              if(canGoNorth && canGoEast) {
-                 result.unshift({x:position.x + 1, y:position.y - 1});
+                 result.push({x:position.x + 1, y:position.y - 1});
              }
              if(canGoEast) {
-                 result.unshift({x:position.x + 1, y:position.y});
+                 result.push({x:position.x + 1, y:position.y});
              }
              if(canGoEast && canGoSouth) {
-                 result.unshift({x:position.x + 1, y:position.y + 1});
+                 result.push({x:position.x + 1, y:position.y + 1});
              }
              if(canGoSouth) {
-                 result.unshift({x:position.x, y:position.y + 1});
+                 result.push({x:position.x, y:position.y + 1});
              }
              if(canGoSouth && canGoWest) {
-                 result.unshift({x:position.x - 1, y:position.y + 1});
+                 result.push({x:position.x - 1, y:position.y + 1});
              }
              var current = toChar(position);
              result = result.filter(function(element, index, array) {
@@ -52,10 +52,9 @@ var Solver = function() {
                         typeof markov[current][nextChar] !== 'undefined';
              });
              result.sort(function(left, right) {
-                 left = toChar(left);
-                 right = toChar(right);
-                 var leftProb = markov[current][left];
-                 var rightProb = markov[current][right];
+                 var currentProb = markov[current];
+                 var leftProb = currentProb[toChar(left)];
+                 var rightProb = currentProb[toChar(right)];
                  if(leftProb > rightProb) {
                      return 1;
                  }
