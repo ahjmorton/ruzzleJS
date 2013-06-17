@@ -1,3 +1,4 @@
+"use strict"
 var Solver = function() {
      function doSolve(grid, starts, wordList, resultCallback) {
          var maxX = grid[0].length;
