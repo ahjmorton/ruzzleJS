@@ -197,7 +197,9 @@ var App = function () {
     function noDups(fn) {
         var seen = {};
         return function(item) {
-            if(!seen.hasOwnProperty[item]) {
+            console.log(seen);
+            console.log(item);
+            if(!seen.hasOwnProperty(item)) {
                 fn(item);
                 seen[item] = undefined;
             }
