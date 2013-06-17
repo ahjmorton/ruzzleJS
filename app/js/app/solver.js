@@ -46,11 +46,27 @@ var Solver = function() {
                  result.unshift({x:position.x - 1, y:position.y + 1});
              }
              var current = toChar(position);
-             return result.filter(function(element, index, array) {
+             result = result.filter(function(element, index, array) {
                  var nextChar = toChar(element);
                  return !seen.hasOwnProperty(toStr(element)) &&
                         typeof markov[current][nextChar] !== 'undefined';
              });
+             result.sort(function(left, right) {
+                 left = toChar(left);
+                 right = toChar(right);
+                 var leftProb = markov[current][left];
+                 var rightProb = markov[current][right];
+                 if(leftProb > rightProb) {
+                     return 1;
+                 }
+                 else if(leftProb < rightProb) {
+                     return -1;
+                 }
+                 else {
+                     return 0;
+                 }
+             });
+             return result;
          }
          function empty(ob) {
              for(var i in ob) { return false; }
