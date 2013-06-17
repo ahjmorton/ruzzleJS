@@ -3,7 +3,7 @@
 define(["app/local-resources","app/local-resources-loader"], 
     function(resources) {
         var LETTERS_PER_WORKER = 4;
-        var WORDLIST_FILE = "js/app/worker.js";
+        var WORKER_SCRIPT = "js/app/worker.js";
         var stoppers = {}
         function sublists(array, size) {
             return array.reduce(function (previousValue, nextValue, index) {
@@ -26,7 +26,7 @@ define(["app/local-resources","app/local-resources-loader"],
                 var results = {};
                 stoppers = {};
                 for (var i = 0; i < assignments.length; i++) {
-                    var worker = new Worker(WORDLIST_FILE);
+                    var worker = new Worker(WORKER_SCRIPT);
                     worker.postMessage({
                         cmd: "start",
                         grid: gridToSendToWorkers,
