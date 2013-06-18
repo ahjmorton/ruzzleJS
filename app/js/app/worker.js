@@ -8,18 +8,9 @@ addEventListener('message', function(e) {
      switch(cmd) {
          case 'start' :
               var grid = data.grid;
-              var locations = [];
-              for(var i = 0; i < data.letters.length ; i++) {
-                  var foundLoc = false;
-                  for(var yLoc = 0; yLoc < grid.length && !foundLoc; yLoc++) {
-                      for(var xLoc = 0; xLoc < grid[yLoc].length && !foundLoc; xLoc++) {
-                          if(grid[yLoc][xLoc] === data.letters[i]) {
-                              locations.push({x:xLoc, y:yLoc});
-                              foundLoc = true;
-                          }
-                      }
-                  }
-              }
+              var locations = data.letters.map(function(element) {
+                  return {x:element[0], y:element[1]};
+              });
               Solver.start(grid, locations, data.wordList, data.markov, function(result) {
                   postMessage({cmd:"result", word:result});
               });

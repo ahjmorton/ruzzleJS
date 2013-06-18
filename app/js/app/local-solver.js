@@ -2,6 +2,7 @@
 
 define(["app/local-resources","app/local-resources-loader"], 
     function(resources) {
+        var GRID_WIDTH = 4;
         var LETTERS_PER_WORKER = 4;
         var WORKER_SCRIPT = "js/app/worker.js";
         var stoppers = {}
@@ -15,18 +16,51 @@ define(["app/local-resources","app/local-resources-loader"],
                 return previousValue;
             }, []);
         };
+        function createAssignments(grid, letterCount) {
+            return sublists(grid.map(
+                function(element, index, array) {
+                    return [index % GRID_WIDTH, Math.floor(index / GRID_WIDTH)];
+                }), letterCount);  
+        };
         return {
             startWork: function(grid, resultFunc, stopFunc) {
                 var wordListObj = resources.getWordList();
                 var markovObj = resources.getMarkovChain();
                 resultFunc = resultFunc || function () {};
                 stopFunc = stopFunc || function() {};
-                var assignments = sublists(grid, LETTERS_PER_WORKER);
-                var gridToSendToWorkers = sublists(grid, 4);
+                var gridToSendToWorkers = sublists(grid, GRID_WIDTH);
+                var assignments = createAssignments(grid, LETTERS_PER_WORKER);
+                var letterAssignments = sublists(grid, LETTERS_PER_WORKER);
                 var results = {};
                 stoppers = {};
                 for (var i = 0; i < assignments.length; i++) {
                     var worker = new Worker(WORKER_SCRIPT);
+                    var cleanup = function(workerId) {
+                        return function() {
+                            delete stoppers[workerId];
+                            stopFunc(workerId, Object.keys(stoppers));
+                        };
+                    }(i);
+                    worker.addEventListener('message', function(cleanupFunc, workerId) {
+                        return function(msgData)  {
+                            msgData = msgData.data;
+                            switch(msgData.cmd) {
+                                case "result" :
+                                    resultFunc(msgData.word);
+                                    break;
+                               case "closing" :
+                                    cleanupFunc();
+                                    break;
+                            }
+                        }
+                    }(cleanup, i));
+                    stoppers[i] = function(toClose, cleanupFunc) {
+                        return function () {
+                            toClose.terminate();
+                            cleanupFunc();
+                        };
+                    }(worker, cleanup);
+                    results[i] = letterAssignments[i];
                     worker.postMessage({
                         cmd: "start",
                         grid: gridToSendToWorkers,
@@ -34,32 +68,7 @@ define(["app/local-resources","app/local-resources-loader"],
                         markov: markovObj,
                         letters: assignments[i]
                     });
-                    var cleanup = function(workerId) {
-                        return function() {
-                            delete stoppers[workerId];
-                            stopFunc(workerId, Object.keys(stoppers));
-                        };
-                    }(i);
-                    worker.addEventListener('message', function(cleanupFunc) {
-                        return function(msgData)  {
-                            msgData = msgData.data;
-                            switch(msgData.cmd) {
-                                case "result" :
-                                    resultFunc(msgData.word);
-                                    break;
-                                case "closing" :
-                                    cleanupFunc();
-                                    break;
-                            }
-                        }
-                    }(cleanup));
-                    stoppers[i] = function(toClose, cleanupFunc) {
-                        return function () {
-                            toClose.terminate();
-                            cleanupFunc();
-                        };
-                    }(worker, cleanup);
-                    results[i] = assignments[i];
+
                  }
                  return results;
             },
