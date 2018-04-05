@@ -1,7 +1,7 @@
-RuzzleJS
-=
+Word game solver
+===============
 
-A basic Ruzzle solver written in Javascript.
+A word game solver, currently only support Ruzzle
 
 Running It
 -
