@@ -1,6 +1,6 @@
 "use strict"
 
-require(["app/local-solver", "app/native-view"], 
+require(["./app/local-solver", "./app/native-view"], 
 function(solver, controller) {
     function noDups(fn) {
         var seen = {};

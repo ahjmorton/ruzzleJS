@@ -1,10 +1,9 @@
 "use strict"
 
-define(["app/local-resources","app/local-resources-loader"], 
-    function(resources) {
+define(["./local-resources","./local-resources-loader", "./solver.worker.js"], 
+    function(resources, nothing, Worker) {
         var GRID_WIDTH = 4;
         var LETTERS_PER_WORKER = 4;
-        var WORKER_SCRIPT = "js/app/worker.js";
         var stoppers = {}
         function sublists(array, size) {
             return array.reduce(function (previousValue, nextValue, index) {
@@ -34,7 +33,7 @@ define(["app/local-resources","app/local-resources-loader"],
                 var results = {};
                 stoppers = {};
                 for (var i = 0; i < assignments.length; i++) {
-                    var worker = new Worker(WORKER_SCRIPT);
+                    var worker = new Worker();
                     var cleanup = function(workerId) {
                         return function() {
                             delete stoppers[workerId];

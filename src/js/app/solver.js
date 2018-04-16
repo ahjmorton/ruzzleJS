@@ -1,6 +1,6 @@
 "use strict"
 
-var Solver = function() {
+define(function() {
      function doSolve(grid, starts, wordList, markov, resultCallback) {
          var maxX = grid[0].length;
          var maxY = grid.length;
@@ -111,5 +111,4 @@ var Solver = function() {
                doSolve(grid, start, wordList, markov, resultFn);
           }
      };
-}();
-
+});
