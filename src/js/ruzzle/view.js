@@ -1,4 +1,4 @@
-import "./ruzzle.css";
+import "./ruzzle.less";
 import html from "./ruzzle.html";
 
 define(function() {
